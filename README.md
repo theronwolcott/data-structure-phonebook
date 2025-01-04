@@ -29,6 +29,7 @@ The `OrderedLinearProbingHashTable` class implements the OLP technique. Keys are
 OrderedLinearProbingHashTable<String, Integer> olpTable = new OrderedLinearProbingHashTable<>(false);
 olpTable.put("entropy", 42);
 olpTable.put("gorilla", 27);
+```
 
 ## Quadtratic Probing
 The 'QuadraticProbingHashTable' class implements QP, using a quadratic function to resolve collisions.
