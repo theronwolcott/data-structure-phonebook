@@ -56,4 +56,10 @@ Both OLP and QP are evaluated for:
   - Search operation speed (successful and unsuccessful).
   - Impact of soft vs. hard deletion.
 
+# Trade-offs
+| Feature             | Ordered Linear Probing | Quadratic Probing |
+|---------------------|------------------------|-------------------|
+| Clustering          | Moderate               | Low               |
+| Cache Locality      | High                   | Moderate          |
+| Deletion Complexity | Simple (Soft)          | Reinsertion Needed|
 
