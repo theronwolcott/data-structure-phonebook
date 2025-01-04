@@ -37,7 +37,23 @@ The 'QuadraticProbingHashTable' class implements QP, using a quadratic function 
 QuadraticProbingHashTable<String, Integer> qpTable = new QuadraticProbingHashTable<>(true);
 qpTable.put("entropy", 42);
 qpTable.put("gorilla", 27);
+```
 
+## Soft Deletion
+Both hash table implementations support soft deletion using a tombstone marker.
+```java
+olpTable.remove("entropy"); // Soft delete
+qpTable.remove("gorilla"); // Soft delete
+```
 
+## Resizing
+The hash tables automatically resize when the load factor exceeds 50%. Capacity is adjusted to the next prime number.
+
+# Performance
+Both OLP and QP are evaluated for:
+
+  - Collision resolution efficiency.
+  - Search operation speed (successful and unsuccessful).
+  - Impact of soft vs. hard deletion.
 
 
