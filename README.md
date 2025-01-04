@@ -30,4 +30,13 @@ OrderedLinearProbingHashTable<String, Integer> olpTable = new OrderedLinearProbi
 olpTable.put("entropy", 42);
 olpTable.put("gorilla", 27);
 
+## Quadtratic Probing
+The 'QuadraticProbingHashTable' class implements QP, using a quadratic function to resolve collisions.
+```java
+QuadraticProbingHashTable<String, Integer> qpTable = new QuadraticProbingHashTable<>(true);
+qpTable.put("entropy", 42);
+qpTable.put("gorilla", 27);
+
+
+
 
