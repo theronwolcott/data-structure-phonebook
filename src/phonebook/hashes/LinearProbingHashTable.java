@@ -1,8 +1,6 @@
 package phonebook.hashes;
 
 import java.util.ArrayList;
-
-import phonebook.exceptions.UnimplementedMethodException;
 import phonebook.utils.KVPair;
 import phonebook.utils.PrimeGenerator;
 
@@ -36,6 +34,7 @@ public class LinearProbingHashTable extends OpenAddressingHashTable {
     /* ********************************************************************/
     /* ** INSERT ANY PRIVATE METHODS OR FIELDS YOU WANT TO USE HERE: ******/
     /* ********************************************************************/
+    // No private fields or methods are defined here; all logic is in public methods below.
 
     /* ******************************************/
     /* IMPLEMENT THE FOLLOWING PUBLIC METHODS: */
@@ -50,7 +49,7 @@ public class LinearProbingHashTable extends OpenAddressingHashTable {
      *             we want soft deletion, {@code false} otherwise.
      */
     public LinearProbingHashTable(boolean soft) {
-        super(soft);
+    super(soft); // Call parent constructor, passing soft deletion flag
     }
 
     /**
@@ -77,30 +76,30 @@ public class LinearProbingHashTable extends OpenAddressingHashTable {
      */
     @Override
     public String put(String key, String value) {
-        resize();
-        int index = hash(key);
+        resize(); // Resize table if needed (see parent class)
+        int index = hash(key); // Get initial index using hash function
+        // Probe linearly until we find an empty slot
         while (table[index] != null) {
-            // if (softFlag && table[index].equals(TOMBSTONE)) {
-            // tombstoneCount--;
-            // break;
-            // }
+            // If slot is occupied, move to next slot (linear probing)
             index = (index + 1) % table.length;
         }
+        // Insert new key-value pair at found index
         table[index] = new KVPair(key, value);
-        count++;
+        count++; // Increment count of items
         return value;
     }
 
     @Override
     public String get(String key) {
-        int index = hash(key);
+        int index = hash(key); // Get initial index using hash function
+        // Probe linearly until we find the key or hit an empty slot
         while (table[index] != null) {
             if (table[index].getKey().equals(key)) {
-                return table[index].getValue();
+                return table[index].getValue(); // Found key, return value
             }
-            index = (index + 1) % table.length;
+            index = (index + 1) % table.length; // Move to next slot
         }
-        return null;
+        return null; // Key not found
     }
 
     /**
@@ -117,37 +116,41 @@ public class LinearProbingHashTable extends OpenAddressingHashTable {
      */
     @Override
     public String remove(String key) {
-        var list = new ArrayList<KVPair>();
-        int index = hash(key);
-        boolean found = false;
-        String value = null;
+    ArrayList<KVPair> list = new ArrayList<>(); // Temporarily store items after the removed one
+        int index = hash(key); // Get initial index using hash function
+        boolean found = false; // Track if we've found the key to remove
+        String value = null; // Store value to return
+        // Probe linearly through cluster
         while (table[index] != null) {
             if (found) {
+                // After removing, collect all items in the cluster to re-insert
                 list.add(table[index]);
                 table[index] = null;
                 count--;
             } else if (table[index].getKey().equals(key)) {
+                // Found the key to remove
                 value = table[index].getValue();
                 if (softFlag) {
+                    // Soft deletion: mark slot as tombstone
                     table[index] = TOMBSTONE;
                     tombstoneCount++;
                     count--;
                     return value;
                 }
-                // hard deletion
+                // Hard deletion: clear slot and mark as found
                 table[index] = null;
                 count--;
                 found = true;
             }
-            index = (index + 1) % table.length;
+            index = (index + 1) % table.length; // Move to next slot
         }
         if (found) {
-            // put back all the items after the removed one in the cluster
-            for (var pair : list) {
+            // Re-insert all items after the removed one to maintain cluster
+            for (KVPair pair : list) {
                 put(pair.getKey(), pair.getValue());
             }
             return value;
         }
-        return value;
+        return value; // Key not found, return null
     }
 }

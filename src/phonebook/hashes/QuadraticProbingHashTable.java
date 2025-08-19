@@ -1,6 +1,5 @@
 package phonebook.hashes;
 
-import phonebook.exceptions.UnimplementedMethodException;
 import phonebook.utils.KVPair;
 import phonebook.utils.PrimeGenerator;
 
@@ -59,71 +58,83 @@ public class QuadraticProbingHashTable extends OpenAddressingHashTable {
      *             not. {@code true} if and only if
      *             we want soft deletion, {@code false} otherwise.
      */
+    // Constructor: initializes the hash table, optionally enabling soft deletion
     public QuadraticProbingHashTable(boolean soft) {
         super(soft);
     }
 
     @Override
     public String put(String key, String value) {
-        resize();
-        int index = hash(key);
-        int originalIndex = hash(key);
-        int i = 1;
+        resize(); // Ensure table is large enough before inserting
+        int index = hash(key); // Get initial index using hash function
+        int originalIndex = hash(key); // Store original index for probing
+        int i = 1; // Probe counter
+        // Probe until we find an empty slot
         while (table[index] != null) {
-            // if (softFlag && table[index].equals(TOMBSTONE)) {
-            // tombstoneCount--;
-            // break;
-            // }
+            // If slot is occupied, calculate next index using quadratic probing
             index = nextIndex(originalIndex, i);
             i++;
         }
+        // Insert the key-value pair at the found index
         table[index] = new KVPair(key, value);
-        count++;
+        count++; // Increment count of elements
         return value;
     }
 
+    // Calculates the next index for quadratic probing
     private int nextIndex(int index, int i) {
+        // Formula: (original index + (i-1) + (i-1)^2) mod table length
         return (index + (i - 1) + ((i - 1) * (i - 1))) % table.length;
     }
 
     @Override
     public String get(String key) {
-        int index = hash(key);
-        int originalIndex = hash(key);
-        int i = 1;
+        int index = hash(key); // Get initial index
+        int originalIndex = hash(key); // Store original index for probing
+        int i = 1; // Probe counter
+        // Probe until we find the key or hit an empty slot
         while (table[index] != null) {
+            // If the key matches, return its value
             if (table[index].getKey().equals(key)) {
                 return table[index].getValue();
             }
+            // Otherwise, continue probing
             index = nextIndex(originalIndex, i);
             i++;
         }
+        // Key not found
         return null;
     }
 
     @Override
     public String remove(String key) {
-        int index = hash(key);
-        int originalIndex = hash(key);
-        int i = 1;
-        String value = null;
+        int index = hash(key); // Get initial index
+        int originalIndex = hash(key); // Store original index for probing
+        int i = 1; // Probe counter
+        String value = null; // To store value if found
+        // Probe until we find the key or hit an empty slot
         while (table[index] != null) {
+            // If the key matches, remove it
             if (table[index].getKey().equals(key)) {
                 value = table[index].getValue();
                 if (softFlag) {
+                    // Soft deletion: mark slot as tombstone
                     table[index] = TOMBSTONE;
                     tombstoneCount++;
                     count--;
                 } else {
+                    // Hard deletion: clear slot and resize if needed
                     table[index] = null;
                     count--;
                     resize(false);
                 }
                 return value;
             }
+            // Otherwise, continue probing
             index = nextIndex(originalIndex, i);
             i++;
         }
+        // Key not found
         return null;
     }
 }

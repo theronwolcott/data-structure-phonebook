@@ -1,6 +1,5 @@
 package phonebook.hashes;
 
-import phonebook.exceptions.UnimplementedMethodException;
 import phonebook.utils.KVPairList;
 import phonebook.utils.PrimeGenerator;
 
@@ -35,12 +34,16 @@ public class SeparateChainingHashTable implements HashTable {
     /* ***** PRIVATE FIELDS / METHODS PROVIDED TO YOU: DO NOT EDIT! ***** */
     /* ****************************************************************** */
 
+    // Array of linked lists, each representing a bucket in the hash table
     private KVPairList[] table;
+    // Number of key-value pairs currently stored
     private int count;
+    // Helper to generate prime numbers for resizing the table
     private PrimeGenerator primeGenerator;
 
     // We mask the top bit of the default hashCode() to filter away negative values.
     // Have to copy over the implementation from OpenAddressingHashTable; no biggie.
+    // Hash function: ensures non-negative index within table bounds
     public int hash(String key) {
         return (key.hashCode() & 0x7fffffff) % table.length;
     }
@@ -52,6 +55,7 @@ public class SeparateChainingHashTable implements HashTable {
      * Default constructor. Initializes the internal storage with a size equal to
      * the default of {@link PrimeGenerator}.
      */
+    // Constructor: initializes table with default prime size
     public SeparateChainingHashTable() {
         primeGenerator = new PrimeGenerator();
         table = new KVPairList[primeGenerator.getCurrPrime()];
@@ -59,54 +63,58 @@ public class SeparateChainingHashTable implements HashTable {
     }
 
     @Override
+    // Adds a key-value pair to the hash table
     public String put(String key, String value) {
-        int index = hash(key);
+        int index = hash(key); // Find bucket index
         if (table[index] == null) {
-            table[index] = new KVPairList();
+            table[index] = new KVPairList(); // Create list if bucket is empty
         }
-        table[index].addBack(key, value);
+        table[index].addBack(key, value); // Add pair to end of list
         count++;
         return value;
     }
 
     @Override
+    // Retrieves the value for a given key, or null if not found
     public String get(String key) {
         int index = hash(key);
         if (table[index] == null) {
-            return null;
+            return null; // No list at this bucket
         }
-        return table[index].getValue(key).getValue();
+        return table[index].getValue(key).getValue(); // Get value from list
     }
 
     @Override
+    // Removes a key-value pair by key, returns the value or null if not found
     public String remove(String key) {
         int index = hash(key);
         if (table[index] == null) {
-            return null;
+            return null; // No list at this bucket
         }
-        var probe = table[index].removeByKey(key);
+        var probe = table[index].removeByKey(key); // Remove from list
         if (probe.getValue() != null) {
-            count--;
+            count--; // Only decrement if something was removed
         }
         return probe.getValue();
     }
 
     @Override
+    // Checks if a key exists in the table
     public boolean containsKey(String key) {
         int index = hash(key);
         if (table[index] == null) {
             return false;
         }
         return table[index].containsKey(key);
-
     }
 
     @Override
+    // Checks if a value exists anywhere in the table
     public boolean containsValue(String value) {
         for (var list : table) {
             if (list != null) {
                 if (list.containsValue(value)) {
-                    return true;
+                    return true; // Found value in a bucket
                 }
             }
         }
@@ -114,15 +122,18 @@ public class SeparateChainingHashTable implements HashTable {
     }
 
     @Override
+    // Returns the number of key-value pairs in the table
     public int size() {
         return count;
     }
 
     @Override
+    // Returns the current capacity (number of buckets)
     public int capacity() {
         return table.length; // Or the value of the current prime.
     }
 
+    // Returns the linked list at a specific bucket index
     public KVPairList get(int idx) throws IndexOutOfBoundsException {
         return table[idx];
     }
@@ -136,14 +147,15 @@ public class SeparateChainingHashTable implements HashTable {
      * 
      * @see PrimeGenerator#getNextPrime()
      */
+    // Increases the table size to the next prime and rehashes all entries
     public void enlarge() {
-        var temp = table;
-        table = new KVPairList[primeGenerator.getNextPrime()];
+        var temp = table; // Save old table
+        table = new KVPairList[primeGenerator.getNextPrime()]; // New larger table
         count = 0;
         for (var list : temp) {
             if (list != null) {
                 for (var pair : list) {
-                    put(pair.getKey(), pair.getValue());
+                    put(pair.getKey(), pair.getValue()); // Re-insert all pairs
                 }
             }
         }
@@ -158,14 +170,15 @@ public class SeparateChainingHashTable implements HashTable {
      *
      * @see PrimeGenerator#getPreviousPrime()
      */
+    // Decreases the table size to the previous prime and rehashes all entries
     public void shrink() {
-        var temp = table;
-        table = new KVPairList[primeGenerator.getPreviousPrime()];
+        var temp = table; // Save old table
+        table = new KVPairList[primeGenerator.getPreviousPrime()]; // New smaller table
         count = 0;
         for (var list : temp) {
             if (list != null) {
                 for (var pair : list) {
-                    put(pair.getKey(), pair.getValue());
+                    put(pair.getKey(), pair.getValue()); // Re-insert all pairs
                 }
             }
         }
